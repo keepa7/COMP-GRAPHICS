@@ -1,0 +1,87 @@
+#include <graphics.h>
+#include <conio.h>
+#include <iostream>
+using namespace std;
+
+
+void plotEllipsePoints(int xc, int yc, int x, int y)
+{
+    putpixel(xc + x, yc + y, WHITE);
+    putpixel(xc - x, yc + y, WHITE);
+    putpixel(xc + x, yc - y, WHITE);
+    putpixel(xc - x, yc - y, WHITE);
+}
+
+
+void drawEllipse(int xc, int yc, int rx, int ry)
+{
+    int x = 0, y = ry;
+
+    long rx2 = rx * rx;
+    long ry2 = ry * ry;
+    long tworx2 = 2 * rx2;
+    long twory2 = 2 * ry2;
+
+    long px = 0;
+    long py = tworx2 * y;
+
+    
+    long p = ry2 - (rx2 * ry) + (0.25 * rx2);
+
+    while (px < py)
+    {
+        plotEllipsePoints(xc, yc, x, y);
+        x++;
+        px += twory2;
+
+        if (p < 0)
+            p += ry2 + px;
+        else
+        {
+            y--;
+            py -= tworx2;
+            p += ry2 + px - py;
+        }
+    }
+
+    
+    p = (ry2 * (x + 0.5) * (x + 0.5)) +
+        (rx2 * (y - 1) * (y - 1)) -
+        (rx2 * ry2);
+
+    while (y >= 0)
+    {
+        plotEllipsePoints(xc, yc, x, y);
+        y--;
+        py -= tworx2;
+
+        if (p > 0)
+            p += rx2 - py;
+        else
+        {
+            x++;
+            px += twory2;
+            p += rx2 - py + px;
+        }
+    }
+}
+
+int main()
+{
+    int gd = DETECT, gm;
+    initgraph(&gd, &gm,(char*) "");
+
+    int xc, yc, rx, ry;
+    cout << "Enter center (xc yc): ";
+    cin >> xc >> yc;
+    cout << "Enter x-radius (rx): ";
+    cin >> rx;
+    cout << "Enter y-radius (ry): ";
+    cin >> ry;
+
+    drawEllipse(xc, yc, rx, ry);
+
+    getch();
+    closegraph();
+    return 0;
+}
