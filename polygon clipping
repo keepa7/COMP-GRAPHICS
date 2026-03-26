@@ -1,0 +1,126 @@
+#include <graphics.h>
+#include <conio.h>
+#include <vector>
+using namespace std;
+
+struct Point {
+    double x, y;
+};
+
+// Cross product
+double cross(Point a, Point b, Point c) {
+    return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x);
+}
+
+// Inside test
+bool inside(Point p, Point a, Point b) {
+    return cross(a, b, p) >= 0;
+}
+
+// Intersection
+Point intersect(Point s, Point e, Point a, Point b) {
+    Point r;
+
+    double A1 = e.y - s.y;
+    double B1 = s.x - e.x;
+    double C1 = A1*s.x + B1*s.y;
+
+    double A2 = b.y - a.y;
+    double B2 = a.x - b.x;
+    double C2 = A2*a.x + B2*a.y;
+
+    double det = A1*B2 - A2*B1;
+
+    if (det == 0) return e; // Parallel
+
+    r.x = (B2*C1 - B1*C2) / det;
+    r.y = (A1*C2 - A2*C1) / det;
+
+    return r;
+}
+
+// Clipping algorithm
+vector<Point> clipPolygon(vector<Point> subject, vector<Point> clip) {
+    vector<Point> output = subject;
+
+    for (int i = 0; i < clip.size(); i++) {
+        vector<Point> input = output;
+        output.clear();
+
+        Point A = clip[i];
+        Point B = clip[(i + 1) % clip.size()];
+
+        if (input.empty()) break;
+
+        Point S = input.back();
+
+        for (int j = 0; j < input.size(); j++) {
+            Point E = input[j];
+
+            if (inside(E, A, B)) {
+                if (!inside(S, A, B))
+                    output.push_back(intersect(S, E, A, B));
+                output.push_back(E);
+            }
+            else if (inside(S, A, B)) {
+                output.push_back(intersect(S, E, A, B));
+            }
+
+            S = E;
+        }
+    }
+
+    return output;
+}
+
+// Draw polygon safely
+void drawPoly(vector<Point> poly, int color) {
+    setcolor(color);
+
+    for (int i = 0; i < poly.size(); i++) {
+        int j = (i + 1) % poly.size();
+        line((int)poly[i].x, (int)poly[i].y,
+             (int)poly[j].x, (int)poly[j].y);
+    }
+}
+
+int main() {
+    int gd = DETECT, gm;
+
+    // IMPORTANT: leave path empty "" for Dev-C++
+    initgraph(&gd, &gm, "");
+
+    // Subject polygon
+    vector<Point> subject;
+    subject.push_back({50,150});
+    subject.push_back({200,50});
+    subject.push_back({350,150});
+    subject.push_back({200,300});
+
+    // Clipping window (RECTANGLE - CCW order)
+    vector<Point> clip;
+    clip.push_back({100,100});
+    clip.push_back({300,100});
+    clip.push_back({300,300});
+    clip.push_back({100,300});
+
+    // Draw original polygon
+    drawPoly(subject, RED);
+
+    // Draw clipping window
+    drawPoly(clip, WHITE);
+
+    // Perform clipping
+    vector<Point> result = clipPolygon(subject, clip);
+
+    // Draw clipped polygon
+    drawPoly(result, GREEN);
+
+    outtextxy(10, 10, "RED: Original");
+    outtextxy(10, 25, "WHITE: Clipping Window");
+    outtextxy(10, 40, "GREEN: Clipped");
+
+    getch();
+    closegraph();
+    return 0;
+}
