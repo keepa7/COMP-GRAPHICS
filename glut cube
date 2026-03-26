@@ -1,0 +1,104 @@
+#include <GL/glut.h>
+
+float angleX = 0.0, angleY = 0.0;
+
+void drawCube() {
+    glBegin(GL_QUADS);
+
+    // Front (Red)
+    glColor3f(1, 0, 0);
+    glVertex3f(-0.5, -0.5, 0.5);
+    glVertex3f(0.5, -0.5, 0.5);
+    glVertex3f(0.5, 0.5, 0.5);
+    glVertex3f(-0.5, 0.5, 0.5);
+
+    // Back (Green)
+    glColor3f(0, 1, 0);
+    glVertex3f(-0.5, -0.5, -0.5);
+    glVertex3f(0.5, -0.5, -0.5);
+    glVertex3f(0.5, 0.5, -0.5);
+    glVertex3f(-0.5, 0.5, -0.5);
+
+    // Left (Blue)
+    glColor3f(0, 0, 1);
+    glVertex3f(-0.5, -0.5, -0.5);
+    glVertex3f(-0.5, -0.5, 0.5);
+    glVertex3f(-0.5, 0.5, 0.5);
+    glVertex3f(-0.5, 0.5, -0.5);
+
+    // Right (Yellow)
+    glColor3f(1, 1, 0);
+    glVertex3f(0.5, -0.5, -0.5);
+    glVertex3f(0.5, -0.5, 0.5);
+    glVertex3f(0.5, 0.5, 0.5);
+    glVertex3f(0.5, 0.5, -0.5);
+
+    // Top (Cyan)
+    glColor3f(0, 1, 1);
+    glVertex3f(-0.5, 0.5, -0.5);
+    glVertex3f(0.5, 0.5, -0.5);
+    glVertex3f(0.5, 0.5, 0.5);
+    glVertex3f(-0.5, 0.5, 0.5);
+
+    // Bottom (Magenta)
+    glColor3f(1, 0, 1);
+    glVertex3f(-0.5, -0.5, -0.5);
+    glVertex3f(0.5, -0.5, -0.5);
+    glVertex3f(0.5, -0.5, 0.5);
+    glVertex3f(-0.5, -0.5, 0.5);
+
+    glEnd();
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glLoadIdentity();
+    glTranslatef(0.0, 0.0, -3.0);   // ?? Move cube further back (IMPORTANT)
+
+    glRotatef(angleX, 1, 0, 0);
+    glRotatef(angleY, 0, 1, 0);
+
+    drawCube();
+
+    glutSwapBuffers();
+}
+
+void specialKeys(int key, int x, int y) {
+    if (key == GLUT_KEY_UP) angleX -= 5;
+    if (key == GLUT_KEY_DOWN) angleX += 5;
+    if (key == GLUT_KEY_LEFT) angleY -= 5;
+    if (key == GLUT_KEY_RIGHT) angleY += 5;
+
+    glutPostRedisplay();
+}
+
+void init() {
+    glEnable(GL_DEPTH_TEST);
+
+    // ?? Set Projection (VERY IMPORTANT)
+    glMatrixMode(GL_PROJECTION);
+    gluPerspective(60, 1.0, 1.0, 10.0);
+
+    glMatrixMode(GL_MODELVIEW);
+
+    glClearColor(1, 1, 1, 1);
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+
+    // ?? Enable DOUBLE BUFFER + DEPTH
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+
+    glutInitWindowSize(600, 600);
+    glutCreateWindow("3D Cube");
+
+    init();
+
+    glutDisplayFunc(display);
+    glutSpecialFunc(specialKeys);
+
+    glutMainLoop();
+    return 0;
+}
